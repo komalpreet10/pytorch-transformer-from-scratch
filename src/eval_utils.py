@@ -12,9 +12,19 @@ def _model_device(model):
 
 
 def format_generation_prompt(row, tokenizer):
+    """
+    Format test row into Llama 3.2 chat format for generation.
+    No assistant turn — model generates the response.
+
+    Args:
+        row (dict): Test row with 'input' column
+        tokenizer: Llama 3.2 tokenizer
+
+    Returns:
+        str: Formatted prompt for generation
+    """
     messages = [
-        {"role": "system", "content": row.get("instruction", "")},
-        {"role": "user", "content": row["input"]},
+        {"role": "user", "content": row["input"]}
     ]
     return tokenizer.apply_chat_template(
         messages,
@@ -30,7 +40,7 @@ def generate_responses(model, tokenizer, dataset, max_new_tokens=200):
     Args:
         model: Fine-tuned or base model
         tokenizer: Llama 3.2 tokenizer
-        dataset: Test dataset with 'input' column
+        dataset: Test dataset with 'input' and 'answer_icliniq' columns
         max_new_tokens (int): Max tokens to generate per response
 
     Returns:
@@ -63,7 +73,7 @@ def generate_responses(model, tokenizer, dataset, max_new_tokens=200):
         )
 
         predictions.append(generated)
-        references.append(row["output"])
+        references.append(row["answer_icliniq"])
 
     return predictions, references
 
@@ -188,20 +198,6 @@ def evaluate_model(model, tokenizer, test_dataset, technique_name):
     """
     print(f"Evaluating {technique_name}...")
 
-    # Generate responses
     predictions, references = generate_responses(
         model, tokenizer, test_dataset
     )
-
-    # Compute all metrics
-    metrics = {}
-    metrics.update(compute_rouge(predictions, references))
-    metrics.update(compute_bertscore(predictions, references))
-    metrics.update(measure_latency(model, tokenizer))
-    metrics.update(measure_gpu_memory())
-
-    print(f"Results for {technique_name}:")
-    for k, v in metrics.items():
-        print(f"  {k}: {v}")
-
-    return metrics

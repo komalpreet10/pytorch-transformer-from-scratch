@@ -4,15 +4,23 @@ import os
 from datasets import load_dataset
 from transformers import AutoTokenizer
 from dotenv import load_dotenv
+
 load_dotenv()
 
-MODEL_ID    = "meta-llama/Llama-3.2-1B-Instruct"
+MODEL_ID      = "meta-llama/Llama-3.2-1B-Instruct"
 TRAIN_DATASET = "lavita/ChatDoctor-HealthCareMagic-100k"
 TEST_DATASET  = "lavita/medical-qa-datasets"
 TEST_SUBSET   = "chatdoctor-icliniq"
 
 
 def get_tokenizer():
+    """
+    Load and configure tokenizer for Llama 3.2 1B Instruct.
+    Sets pad token to eos token and padding to right side.
+
+    Returns:
+        AutoTokenizer: Configured Llama 3.2 tokenizer
+    """
     tokenizer = AutoTokenizer.from_pretrained(
         MODEL_ID,
         token=os.getenv("HF_TOKEN")
@@ -24,7 +32,7 @@ def get_tokenizer():
 
 def format_prompt(row, tokenizer):
     """
-    Format a dataset row into Llama 3.2 chat template format.
+    Format a training dataset row into Llama 3.2 chat template format.
 
     Args:
         row (dict): Dataset row with keys instruction, input, output
@@ -45,48 +53,36 @@ def format_prompt(row, tokenizer):
     )
 
 
-def load_train_data(tokenizer):
+def load_train_data(tokenizer, sample=None):
     """
     Load and format ChatDoctor-HealthCareMagic training dataset.
 
     Args:
         tokenizer: Llama 3.2 tokenizer
+        sample (int, optional): Rows to load. None = full 112K.
+
     Returns:
         Dataset: With added 'text' column in Llama 3.2 format
     """
     dataset = load_dataset(TRAIN_DATASET, split="train")
+    if sample is not None:
+        dataset = dataset.select(range(sample))
     dataset = dataset.map(lambda x: {"text": format_prompt(x, tokenizer)})
     return dataset
 
 
-def load_test_data():
+def load_test_data(sample=None):
     """
     Load ChatDoctor-iCliniq test dataset (raw, no formatting).
+    Columns: input, answer_icliniq, answer_chatgpt, answer_chatdoctor
+
+    Args:
+        sample (int, optional): Rows to load. None = full 7.3K.
 
     Returns:
-        Dataset: With instruction, input, output columns
+        Dataset: With input and answer_icliniq columns
     """
     dataset = load_dataset(TEST_DATASET, TEST_SUBSET, split="test")
+    if sample is not None:
+        dataset = dataset.select(range(sample))
     return dataset
-
-if __name__ == "__main__":
-    print("Testing data_utils.py...\n")
-
-    tokenizer = get_tokenizer()
-    print(f"Tokenizer loaded: vocab size = {tokenizer.vocab_size}")
-
-    print("\nLoading full training dataset...")
-    train = load_train_data(tokenizer)
-    print(f"Train rows    : {len(train)}")
-    print(f"Train columns : {train.column_names}")
-    print(f"\nFormatted prompt preview:")
-    print(train[0]['text'][:400])
-
-    print("\nLoading full test dataset...")
-    test = load_test_data()
-    print(f"Test rows    : {len(test)}")
-    print(f"Test columns : {test.column_names}")
-    print(f"\nTest input preview:")
-    print(test[0]['input'][:200])
-
-    print("\ndata_utils.py working correctly!")
