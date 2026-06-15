@@ -45,37 +45,28 @@ def format_prompt(row, tokenizer):
     )
 
 
-def load_train_data(tokenizer, sample=None):
+def load_train_data(tokenizer):
     """
     Load and format ChatDoctor-HealthCareMagic training dataset.
 
     Args:
         tokenizer: Llama 3.2 tokenizer
-        sample (int, optional): Rows to load. None = full 112K.
-
     Returns:
         Dataset: With added 'text' column in Llama 3.2 format
     """
     dataset = load_dataset(TRAIN_DATASET, split="train")
-    if sample is not None:
-        dataset = dataset.select(range(sample))
     dataset = dataset.map(lambda x: {"text": format_prompt(x, tokenizer)})
     return dataset
 
 
-def load_test_data(sample=None):
+def load_test_data():
     """
     Load ChatDoctor-iCliniq test dataset (raw, no formatting).
-
-    Args:
-        sample (int, optional): Rows to load. None = full 7.3K.
 
     Returns:
         Dataset: With instruction, input, output columns
     """
-    dataset = load_dataset(TEST_DATASET, TEST_SUBSET, split="train")
-    if sample is not None:
-        dataset = dataset.select(range(sample))
+    dataset = load_dataset(TEST_DATASET, TEST_SUBSET, split="test")
     return dataset
 
 if __name__ == "__main__":
@@ -84,15 +75,15 @@ if __name__ == "__main__":
     tokenizer = get_tokenizer()
     print(f"Tokenizer loaded: vocab size = {tokenizer.vocab_size}")
 
-    print("\nLoading 5 training rows...")
-    train = load_train_data(tokenizer, sample=5)
+    print("\nLoading full training dataset...")
+    train = load_train_data(tokenizer)
     print(f"Train rows    : {len(train)}")
     print(f"Train columns : {train.column_names}")
     print(f"\nFormatted prompt preview:")
     print(train[0]['text'][:400])
 
-    print("\nLoading 5 test rows...")
-    test = load_test_data(sample=5)
+    print("\nLoading full test dataset...")
+    test = load_test_data()
     print(f"Test rows    : {len(test)}")
     print(f"Test columns : {test.column_names}")
     print(f"\nTest input preview:")
