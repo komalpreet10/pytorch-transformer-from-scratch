@@ -36,6 +36,11 @@ def setup_kaggle():
             os.environ[secret_name] = secrets.get_secret(secret_name)
         except Exception as exc:
             print(f"Warning: Kaggle secret {secret_name} not found: {exc}")
+    if os.getenv("WANDB_TOKEN"):
+        os.environ["WANDB_API_KEY"] = os.environ["WANDB_TOKEN"]
+        os.environ.pop("WANDB_MODE", None)
+    else:
+        os.environ["WANDB_MODE"] = "disabled"
 
     print("Setup complete")
 
@@ -45,4 +50,9 @@ def setup_local():
     sys.path.append("..")
     from dotenv import load_dotenv
     load_dotenv()
+    if os.getenv("WANDB_TOKEN"):
+        os.environ["WANDB_API_KEY"] = os.environ["WANDB_TOKEN"]
+        os.environ.pop("WANDB_MODE", None)
+    else:
+        os.environ["WANDB_MODE"] = "disabled"
     print("Setup complete")

@@ -10,6 +10,19 @@ from trl import SFTConfig, SFTTrainer
 load_dotenv()
 
 
+def _wandb_token():
+    return os.getenv("WANDB_TOKEN") or os.getenv("WANDB_API_KEY")
+
+
+def _close_active_runs():
+    """Make notebook reruns safe by closing any active tracking runs."""
+    if wandb.run is not None:
+        wandb.finish()
+
+    while mlflow.active_run() is not None:
+        mlflow.end_run()
+
+
 def init_trackers(technique_name):
     """
     Initialize WandB and MLflow experiment tracking.
@@ -17,9 +30,13 @@ def init_trackers(technique_name):
     Args:
         technique_name (str): One of baseline, linear_probing, lora, qlora
     """
-    wandb_token = os.getenv("WANDB_TOKEN")
+    _close_active_runs()
+
+    wandb_token = _wandb_token()
     if wandb_token:
-        wandb.login(key=wandb_token)
+        os.environ["WANDB_API_KEY"] = wandb_token
+        os.environ.pop("WANDB_MODE", None)
+        wandb.login(key=wandb_token, relogin=True)
         wandb.init(
             project="medical-llm-peft-benchmark",
             name=technique_name
@@ -42,8 +59,10 @@ def log_metrics(metrics):
     Args:
         metrics (dict): Dictionary of metric name to value
     """
-    wandb.log(metrics)
-    mlflow.log_metrics(metrics)
+    if wandb.run is not None:
+        wandb.log(metrics)
+    if mlflow.active_run() is not None:
+        mlflow.log_metrics(metrics)
 
 
 def end_trackers():
@@ -51,8 +70,7 @@ def end_trackers():
     Close WandB and MLflow runs cleanly.
     Call after training and evaluation are complete.
     """
-    wandb.finish()
-    mlflow.end_run()
+    _close_active_runs()
 
 
 def get_training_args(output_dir, config_path="configs/training_config.yaml"):
@@ -69,6 +87,8 @@ def get_training_args(output_dir, config_path="configs/training_config.yaml"):
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
+    report_to = ["wandb"] if _wandb_token() else []
+
     return SFTConfig(
         output_dir=output_dir,
         num_train_epochs=config["num_train_epochs"],
@@ -81,7 +101,7 @@ def get_training_args(output_dir, config_path="configs/training_config.yaml"):
         save_steps=config["save_steps"],
         fp16=config["fp16"],
         seed=config["seed"],
-        report_to=["wandb"],
+        report_to=report_to,
         dataset_text_field="text",
         max_length=config["max_seq_length"],
         optim="adamw_torch"
