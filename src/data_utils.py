@@ -12,16 +12,6 @@ TEST_DATASET  = "lavita/medical-qa-datasets"
 TEST_SUBSET   = "chatdoctor-icliniq"
 
 
-def _first_existing_column(column_names, candidates):
-    for candidate in candidates:
-        if candidate in column_names:
-            return candidate
-    raise KeyError(
-        f"None of the expected columns {candidates} found. "
-        f"Available columns: {column_names}"
-    )
-
-
 def get_tokenizer():
     tokenizer = AutoTokenizer.from_pretrained(
         MODEL_ID,
@@ -77,24 +67,6 @@ def load_test_data():
         Dataset: With instruction, input, output columns
     """
     dataset = load_dataset(TEST_DATASET, TEST_SUBSET, split="test")
-    columns = dataset.column_names
-
-    input_col = _first_existing_column(
-        columns,
-        ["input", "question", "Question", "query", "prompt"]
-    )
-    output_col = _first_existing_column(
-        columns,
-        ["output", "answer", "Answer", "response", "target", "reference"]
-    )
-
-    dataset = dataset.map(
-        lambda row: {
-            "instruction": row.get("instruction", ""),
-            "input": row[input_col],
-            "output": row[output_col],
-        }
-    )
     return dataset
 
 if __name__ == "__main__":
