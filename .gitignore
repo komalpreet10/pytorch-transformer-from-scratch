@@ -1,0 +1,55 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter / notebooks
+*.nbconvert.ipynb
+
+# ML artifacts and generated outputs
+data/
+outputs/
+checkpoints/
+runs/
+wandb/
+mlruns/
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Generated benchmark artifacts.
+# Keep final curated results/plots commit-able for the README.
+results/*
+plots/*
+!results/.gitkeep
+!plots/.gitkeep
+!results/final_*.json
+!results/comparison_metrics.csv
+!plots/final_*.png
+
+# Hugging Face / dataset caches
+.cache/
+cache/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+
+# Logs
+*.log

@@ -8,4 +8,3 @@ using Llama 3.2 1B Instruct on the ChatDoctor-100K dataset.
 - Python, PyTorch, HuggingFace PEFT, TRL, bitsandbytes
 - WandB, MLflow
 - Kaggle T4 GPU
-
