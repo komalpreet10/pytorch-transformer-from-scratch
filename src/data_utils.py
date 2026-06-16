@@ -12,6 +12,9 @@ TRAIN_DATASET = "lavita/ChatDoctor-HealthCareMagic-100k"
 TEST_DATASET  = "lavita/medical-qa-datasets"
 TEST_SUBSET   = "chatdoctor-icliniq"
 
+TRAIN_SAMPLE  = 10000  # set to None for full 112K
+TEST_SAMPLE   = 200    # set to None for full 7.3K
+
 
 def get_tokenizer():
     """
@@ -53,13 +56,13 @@ def format_prompt(row, tokenizer):
     )
 
 
-def load_train_data(tokenizer, sample=None):
+def load_train_data(tokenizer, sample=TRAIN_SAMPLE):
     """
     Load and format ChatDoctor-HealthCareMagic training dataset.
 
     Args:
         tokenizer: Llama 3.2 tokenizer
-        sample (int, optional): Rows to load. None = full 112K.
+        sample (int, optional): Rows to load. Default 10K. None = full 112K.
 
     Returns:
         Dataset: With added 'text' column in Llama 3.2 format
@@ -71,13 +74,13 @@ def load_train_data(tokenizer, sample=None):
     return dataset
 
 
-def load_test_data(sample=None):
+def load_test_data(sample=TEST_SAMPLE):
     """
     Load ChatDoctor-iCliniq test dataset (raw, no formatting).
     Columns: input, answer_icliniq, answer_chatgpt, answer_chatdoctor
 
     Args:
-        sample (int, optional): Rows to load. None = full 7.3K.
+        sample (int, optional): Rows to load. Default 200. None = full 7.3K.
 
     Returns:
         Dataset: With input and answer_icliniq columns
