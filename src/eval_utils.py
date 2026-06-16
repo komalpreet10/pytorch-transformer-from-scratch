@@ -201,3 +201,14 @@ def evaluate_model(model, tokenizer, test_dataset, technique_name):
     predictions, references = generate_responses(
         model, tokenizer, test_dataset
     )
+
+    metrics = {
+        "technique": technique_name,
+        "num_test_samples": len(predictions)
+    }
+    metrics.update(compute_rouge(predictions, references))
+    metrics.update(compute_bertscore(predictions, references))
+    metrics.update(measure_latency(model, tokenizer))
+    metrics.update(measure_gpu_memory())
+
+    return metrics
