@@ -3,7 +3,7 @@ import torch
 
 from src.decoder.model import DecoderTransformer
 from src.decoder.dataset import CharTokenizer
-from src.utils.config import DEVICE, CHECKPOINTS_DIR
+from src.utils.config import DEVICE, CHECKPOINTS_DIR, DecoderConfig
 
 
 @torch.no_grad()
@@ -27,8 +27,8 @@ def generate(model, tokenizer, prompt, max_new_tokens, max_seq_len, temperature=
 
 
 def load_checkpoint(path, device):
-    checkpoint = torch.load(path, map_location=device)
-    cfg = checkpoint["config"]
+    checkpoint = torch.load(path, map_location=device, weights_only=False)
+    cfg = DecoderConfig(**checkpoint["config"])
 
     tokenizer = CharTokenizer()
     tokenizer.char_to_id = checkpoint["tokenizer_char_to_id"]

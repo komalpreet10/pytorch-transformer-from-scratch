@@ -1,3 +1,4 @@
+import dataclasses
 import math
 import torch
 import torch.nn as nn
@@ -85,7 +86,7 @@ def main():
             best_val_loss = val_loss
             torch.save({
                 "model_state_dict": model.state_dict(),
-                "config": cfg,
+                "config": dataclasses.asdict(cfg),
                 "epoch": epoch,
                 "val_loss": val_loss,
                 "tokenizer_char_to_id": tokenizer.char_to_id,

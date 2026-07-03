@@ -1,3 +1,4 @@
+import dataclasses
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -83,7 +84,7 @@ def main():
             best_acc = val_acc
             torch.save({
                 "model_state_dict": model.state_dict(),
-                "config": cfg,
+                "config": dataclasses.asdict(cfg),
                 "epoch": epoch,
                 "val_acc": val_acc,
             }, CHECKPOINTS_DIR / "encoder_best.pt")
