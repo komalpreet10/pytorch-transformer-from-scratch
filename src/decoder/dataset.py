@@ -50,10 +50,13 @@ class ShakespeareDataset(Dataset):
 
 def load_tiny_shakespeare(block_size=256, batch_size=64, train_split=0.9,
                            samples_per_epoch=2000):
-    from datasets import load_dataset
+    """Downloads the raw Tiny Shakespeare text directly (the HF dataset
+    'karpathy/tiny_shakespeare' uses a deprecated loading-script format that
+    the datasets library no longer supports, so we bypass it entirely)."""
+    import urllib.request
 
-    raw = load_dataset("karpathy/tiny_shakespeare")
-    text = raw["train"]["text"][0]
+    url = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
+    text = urllib.request.urlopen(url).read().decode("utf-8")
 
     tokenizer = CharTokenizer().build_vocab(text)
     token_ids = tokenizer.encode(text)
