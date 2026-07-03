@@ -87,37 +87,6 @@ results/               # training curves, confusion matrix, generated text
 checkpoints/           # saved model weights (gitignored)
 ```
 
-## Running
-
-Developed locally, trained on Kaggle Notebooks (free T4/P100 GPU).
-
-```bash
-pip install -r requirements.txt
-
-# Encoder-only: AG News classification
-python -m src.encoder.train
-
-# Decoder-only: Tiny Shakespeare generation
-python -m src.decoder.train
-python -m src.decoder.generate --prompt "ROMEO:" --max_new_tokens 300
-```
-
-On Kaggle, after cloning:
-```python
-!git clone https://github.com/<username>/pytorch-transformer-from-scratch.git
-%cd pytorch-transformer-from-scratch
-!pip install -q datasets
-!python -m src.encoder.train
-```
-
-## Tests
-
-```bash
-pytest tests/ -v
-```
-
-11 tests covering: attention output shapes, multi-head split/combine correctness, attention weights summing to 1, causal mask correctness (zero leakage into future positions), padding mask correctness, and residual connections actually carrying signal through a block.
-
 ## References
 - Vaswani et al., ["Attention Is All You Need"](https://arxiv.org/abs/1706.03762) (2017)
 - [AG News dataset](https://huggingface.co/datasets/fancyzhx/ag_news)
