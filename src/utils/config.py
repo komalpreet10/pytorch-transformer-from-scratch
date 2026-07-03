@@ -56,7 +56,8 @@ class DecoderConfig:
     # training
     batch_size: int = 64
     lr: float = 3e-4
-    epochs: int = 10
+    epochs: int = 8
+    samples_per_epoch: int = 2000   # random windows per epoch, not exhaustive
     eval_interval: int = 500
 
     # generation

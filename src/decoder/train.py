@@ -54,6 +54,7 @@ def main():
     train_loader, val_loader, tokenizer = load_tiny_shakespeare(
         block_size=cfg.max_seq_len,
         batch_size=cfg.batch_size,
+        samples_per_epoch=cfg.samples_per_epoch,
     )
     cfg.vocab_size = len(tokenizer)
     print(f"vocab size: {cfg.vocab_size}, device: {DEVICE}")

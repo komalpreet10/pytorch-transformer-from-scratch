@@ -1,10 +1,9 @@
+import random
 import torch
 from torch.utils.data import Dataset, DataLoader
 
 
 class CharTokenizer:
-    """Character-level tokenizer -- every unique character gets an id."""
-
     def __init__(self):
         self.char_to_id = {}
         self.id_to_char = {}
@@ -26,25 +25,31 @@ class CharTokenizer:
 
 
 class ShakespeareDataset(Dataset):
-    """Chunks a long character stream into fixed-length (input, target) pairs
-    for next-token prediction. target is input shifted by one character."""
+    """Randomly samples fixed-length (input, target) windows from the character
+    stream, nanoGPT-style, instead of exhaustively iterating every possible
+    window. This makes epoch length controllable and training time predictable,
+    rather than scaling with the full length of the text."""
 
-    def __init__(self, token_ids, block_size):
+    def __init__(self, token_ids, block_size, samples_per_epoch=2000):
         self.token_ids = token_ids
         self.block_size = block_size
+        self.samples_per_epoch = samples_per_epoch
 
     def __len__(self):
-        return len(self.token_ids) - self.block_size
+        return self.samples_per_epoch
 
     def __getitem__(self, idx):
-        chunk = self.token_ids[idx: idx + self.block_size + 1]
+        # ignore idx -- draw a fresh random window every call
+        max_start = len(self.token_ids) - self.block_size - 1
+        start = random.randint(0, max_start)
+        chunk = self.token_ids[start: start + self.block_size + 1]
         x = torch.tensor(chunk[:-1], dtype=torch.long)
         y = torch.tensor(chunk[1:], dtype=torch.long)
         return x, y
 
 
-def load_tiny_shakespeare(block_size=256, batch_size=64, train_split=0.9):
-    """Downloads Tiny Shakespeare from HuggingFace, builds char vocab, returns DataLoaders."""
+def load_tiny_shakespeare(block_size=256, batch_size=64, train_split=0.9,
+                           samples_per_epoch=2000):
     from datasets import load_dataset
 
     raw = load_dataset("karpathy/tiny_shakespeare")
@@ -57,8 +62,8 @@ def load_tiny_shakespeare(block_size=256, batch_size=64, train_split=0.9):
     train_ids = token_ids[:split_idx]
     val_ids = token_ids[split_idx:]
 
-    train_ds = ShakespeareDataset(train_ids, block_size)
-    val_ds = ShakespeareDataset(val_ids, block_size)
+    train_ds = ShakespeareDataset(train_ids, block_size, samples_per_epoch)
+    val_ds = ShakespeareDataset(val_ids, block_size, samples_per_epoch // 5)
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
@@ -67,18 +72,18 @@ def load_tiny_shakespeare(block_size=256, batch_size=64, train_split=0.9):
 
 
 if __name__ == "__main__":
-    # self-test with a small dummy text -- no network call
     dummy_text = "ROMEO: But soft, what light through yonder window breaks? " * 20
 
     tokenizer = CharTokenizer().build_vocab(dummy_text)
     token_ids = tokenizer.encode(dummy_text)
 
-    ds = ShakespeareDataset(token_ids, block_size=16)
+    ds = ShakespeareDataset(token_ids, block_size=16, samples_per_epoch=40)
     loader = DataLoader(ds, batch_size=4, shuffle=True)
 
+    print("dataset length (samples_per_epoch):", len(ds))
+    print("num batches per epoch:", len(loader))
+
     x, y = next(iter(loader))
-    print("vocab size:", len(tokenizer))
-    print("x shape:", x.shape, "y shape:", y.shape)  # (4, 16) each
+    print("x shape:", x.shape, "y shape:", y.shape)
     print("x[0] decoded:", repr(tokenizer.decode(x[0].tolist())))
     print("y[0] decoded:", repr(tokenizer.decode(y[0].tolist())))
-    print("(y is x shifted by one character -- next-token prediction target)")
