@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.egg-info/
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model checkpoints / large artifacts (keep repo lightweight)
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+# Data (downloaded at runtime, don't commit)
+data/
+*.csv
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Env vars / secrets
+.env
