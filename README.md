@@ -13,37 +13,29 @@ Most of my other projects use PyTorch through high-level wrappers (HuggingFace `
 ## Architecture
 
 ```
-                          src/core (shared by both variants)
-        ┌───────────────────────────────────────────────────────┐
-        │   Positional Encoding          Multi-Head Attention     │
-        │      (sinusoidal)          (scaled dot-product, masked   │
-        │                                   or unmasked)            │
-        │                    \                /                    │
-        │              Position-wise Feed-Forward                  │
-        │                          |                                │
-        │                  Transformer Block                        │
-        │        (Attention -> Add&Norm -> FFN -> Add&Norm)          │
-        └───────────────────────────────────────────────────────┘
-                        /                          \
-                       /                            \
-      ENCODER-ONLY (BERT-style)            DECODER-ONLY (GPT-style)
-   ┌───────────────────────────┐       ┌───────────────────────────┐
-   │   Token Embedding           │       │   Token Embedding           │
-   │          |                  │       │          |                  │
-   │   + Positional Encoding     │       │   + Positional Encoding     │
-   │          |                  │       │          |                  │
-   │   N x Transformer Block      │       │   N x Transformer Block      │
-   │   mask = None                 │       │   mask = causal               │
-   │   (bidirectional)             │       │   (lower-triangular)          │
-   │          |                  │       │          |                  │
-   │   Mean Pooling                │       │   LM Head (-> vocab_size)     │
-   │          |                  │       │          |                  │
-   │   Classification Head         │       │   Next character              │
-   │          |                  │       │   (autoregressive sampling)   │
-   │   AG News class                │       │                                │
-   │   (World / Sports /             │       │                                │
-   │    Business / Sci-Tech)          │       │                                │
-   └───────────────────────────┘       └───────────────────────────┘
+        Token Embedding + Positional Encoding
+                      |
+                      v
+        +---------------------------+
+        |     Transformer Block      |   x N   (shared for both variants)
+        |  Multi-Head Attention      |
+        |  -> Add & Norm             |
+        |  -> Feed Forward           |
+        |  -> Add & Norm             |
+        +---------------------------+
+                      |
+          mask=None  /   \  mask=causal
+                    /       \
+                   v         v
+          +--------------+  +--------------+
+          |  ENCODER     |  |  DECODER     |
+          |  Mean Pool   |  |  LM Head     |
+          |  -> Classify |  |  -> Next tok |
+          +--------------+  +--------------+
+                 |                  |
+                 v                  v
+           AG News class      Generated text
+           (4 categories)     (char by char)
 ```
 
 The only structural difference between the two variants is the `mask` passed into `MultiHeadAttention`:
