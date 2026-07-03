@@ -52,13 +52,12 @@ The only structural difference between the two variants is the `mask` passed int
 ### Encoder-only — AG News classification
 - Dataset: [AG News](https://huggingface.co/datasets/fancyzhx/ag_news) (120K train / 7.6K test, 4 classes)
 - Tokenizer: word-level, built from scratch (`src/utils/tokenizer.py`)
-- Attention heatmap: `notebooks/01_attention_visualization.ipynb`
+
 
 ### Decoder-only — Tiny Shakespeare generation
 - Dataset: [Tiny Shakespeare](https://huggingface.co/datasets/karpathy/tiny_shakespeare), character-level
 - Tokenizer: character-level, built from scratch (`src/decoder/dataset.py`)
-- Validation loss / perplexity: **TBD**
-- Sample generations: `notebooks/02_generation_samples.ipynb`
+
 
 ## Repo structure
 
