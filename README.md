@@ -52,8 +52,6 @@ The only structural difference between the two variants is the `mask` passed int
 ### Encoder-only — AG News classification
 - Dataset: [AG News](https://huggingface.co/datasets/fancyzhx/ag_news) (120K train / 7.6K test, 4 classes)
 - Tokenizer: word-level, built from scratch (`src/utils/tokenizer.py`)
-- Accuracy: **TBD** (fill in after training on Kaggle)
-- F1 (macro): **TBD**
 - Attention heatmap: `notebooks/01_attention_visualization.ipynb`
 
 ### Decoder-only — Tiny Shakespeare generation
