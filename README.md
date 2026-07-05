@@ -1,6 +1,6 @@
 # pytorch-transformer-from-scratch
 
-Transformer architecture ("Attention Is All You Need", Vaswani et al., 2017) implemented from scratch in raw PyTorch — no `nn.Transformer`, no HuggingFace `transformers`, no pretrained weights. Every component (multi-head attention, positional encoding, feed-forward layers, layer norm, causal masking) is implemented and unit-tested from first principles.
+Transformer architecture ("Attention Is All You Need", Vaswani et al., 2017) implemented from scratch in raw PyTorch,
 
 Two variants share one core implementation:
 - **Encoder-only** (BERT-style, bidirectional) → text classification on AG News
