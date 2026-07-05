@@ -6,10 +6,6 @@ Two variants share one core implementation:
 - **Encoder-only** (BERT-style, bidirectional) → text classification on AG News
 - **Decoder-only** (GPT-style, causal) → character-level text generation on Tiny Shakespeare
 
-## Why this project
-
-Most of my other projects use PyTorch through high-level wrappers (HuggingFace `Trainer`, PEFT). This project demonstrates the ability to implement deep learning architectures at the tensor level.
-
 ## Architecture
 
 ```
